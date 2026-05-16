@@ -533,4 +533,3 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
     </div>
   );
 }
-}
