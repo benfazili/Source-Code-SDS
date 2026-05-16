@@ -76,16 +76,11 @@ export function DashboardHeader({ driverInfo, onLogout, hasAlerts }: DashboardHe
 
             {/* System Status */}
             <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-success/10 border border-success/20">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-success" />
               <span className="text-xs font-medium text-success">SYSTEM ONLINE</span>
             </div>
 
             <div className="h-8 w-px bg-border/50" />
-              <span className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
-              <span className="text-sm text-muted-foreground">System Online</span>
-            </div>
-
-            <div className="h-10 w-px bg-border" />
 
             {/* Notifications */}
             <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
