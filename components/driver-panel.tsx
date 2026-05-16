@@ -29,9 +29,10 @@ interface DriverPanelProps {
 const KIGALI_CENTER = { lat: -1.9403, lng: 29.8739 };
 const GEOFENCE_RADIUS = 15000;
 const SPEED_LIMIT = 80;
-const GPS_ACCURACY_THRESHOLD = 20; // meters
-const MIN_SPEED_THRESHOLD = 1; // km/h
-const SPEED_SMOOTHING_FACTOR = 5; // rolling average size
+const GPS_ACCURACY_THRESHOLD = 50; // meters - increased for better real-world performance
+const MIN_SPEED_THRESHOLD = 0.5; // km/h - lower threshold for better sensitivity
+const SPEED_SMOOTHING_FACTOR = 3; // rolling average size - reduced for faster responsiveness
+const UPDATE_INTERVAL = 500; // 500ms for real-time updates
 
 interface SpeedRecord {
   timestamp: string;
@@ -169,8 +170,9 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
 
       // Calculate speed if not provided by GPS
       let calculatedSpeed = 0;
-      if (rawSpeed !== null) {
-        calculatedSpeed = Math.round(rawSpeed * 3.6 * 10) / 10;
+      if (rawSpeed !== null && rawSpeed >= 0) {
+        // Convert m/s to km/h (rawSpeed * 3.6)
+        calculatedSpeed = Math.round(rawSpeed * 3.6 * 100) / 100;
       } else if (lastPositionRef.current) {
         const distance = calculateDistance(
           lastPositionRef.current.lat,
@@ -179,26 +181,30 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
           longitude
         );
         const timeDelta = (Date.now() - lastPositionRef.current.timestamp) / 1000;
-        if (timeDelta > 0.5) {
-          calculatedSpeed = Math.round((distance / timeDelta) * 3.6 * 10) / 10;
+        // Only calculate if sufficient time has passed
+        if (timeDelta >= 0.3 && distance > 0) {
+          calculatedSpeed = Math.round(((distance / timeDelta) * 3.6) * 100) / 100;
         }
       }
 
-      // Ignore GPS noise (less than 3 meters)
+      // Validate GPS accuracy - more lenient threshold
       if (accuracy && accuracy > GPS_ACCURACY_THRESHOLD) {
         setGpsAccuracy(Math.round(accuracy));
         return;
       }
+
+      // Set accuracy
+      setGpsAccuracy(accuracy ? Math.round(accuracy) : null);
 
       // Set speed to 0 if below threshold
       if (calculatedSpeed < MIN_SPEED_THRESHOLD) {
         calculatedSpeed = 0;
       }
 
-      // Apply smoothing
+      // Apply smoothing for more stable readings
       const smoothedSpeed = smoothSpeed(calculatedSpeed);
       setCurrentSpeed(smoothedSpeed);
-      setIsMoving(smoothedSpeed > 0);
+      setIsMoving(smoothedSpeed > MIN_SPEED_THRESHOLD);
 
       // Update max speed
       if (smoothedSpeed > maxSpeed) {
@@ -208,7 +214,7 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       // Calculate average speed
       if (speedRecordsRef.current.length > 0) {
         const avgSpeed = speedRecordsRef.current.reduce((sum, r) => sum + r.speed, 0) / speedRecordsRef.current.length;
-        setAverageSpeed(Math.round(avgSpeed * 10) / 10);
+        setAverageSpeed(Math.round(avgSpeed * 100) / 100);
       }
 
       // Calculate distance if moving
@@ -219,7 +225,10 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
           latitude,
           longitude
         );
-        setTotalDistance(prev => Math.round((prev + distance) * 100) / 100);
+        // Only add distance if it's reasonable (less than 1km in one update)
+        if (distance > 0 && distance < 1000) {
+          setTotalDistance(prev => Math.round((prev + distance) * 100) / 100);
+        }
       }
 
       // Record speed data
@@ -244,7 +253,6 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       }
 
       setPosition(newPos);
-      setGpsAccuracy(accuracy ? Math.round(accuracy) : null);
       lastPositionRef.current = { lat: latitude, lng: longitude, timestamp: Date.now() };
 
       // Save session periodically
@@ -272,14 +280,14 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       console.error("[v0] GPS Error:", error.message);
     };
 
-    // Start watching position with high accuracy
+    // Start watching position with optimized settings for real-time tracking
     watchIdRef.current = navigator.geolocation.watchPosition(
       handleSuccess,
       handleError,
       {
         enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000,
+        maximumAge: 100, // Allow up to 100ms of cached position
+        timeout: 5000,   // 5 second timeout for each position update
       }
     ) as unknown as number;
 

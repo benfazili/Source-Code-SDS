@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Lock, Mail, AlertCircle, Eye, EyeOff, User, Phone, Car, UserCog, Truck } from "lucide-react";
+import { Shield, Lock, Mail, AlertCircle, Eye, EyeOff, User, Phone, Car, UserCog, Truck, ArrowRight } from "lucide-react";
 
 // User role types
 export type UserRole = "admin" | "driver";
@@ -35,13 +35,46 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({});
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    return cleanPhone.length >= 10;
+  };
+
+  const validatePlate = (plate: string) => {
+    return plate.trim().length >= 3 && plate.trim().length <= 10;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setValidationErrors({});
 
     if (loginMode === "admin") {
-      // Admin login - only email and password required
+      // Admin login validation
+      const errors: { [key: string]: string } = {};
+      
+      if (!email.trim()) {
+        errors.email = "Email is required";
+      } else if (!validateEmail(email)) {
+        errors.email = "Invalid email format";
+      }
+      
+      if (!password.trim()) {
+        errors.password = "Password is required";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+
       if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
         setError("Invalid admin credentials. Access denied.");
         return;
@@ -62,17 +95,29 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       localStorage.setItem("sds_user", JSON.stringify(adminInfo));
       onLogin(adminInfo);
     } else {
-      // Driver login - all fields required
+      // Driver login validation
+      const errors: { [key: string]: string } = {};
+      
       if (!name.trim()) {
-        setError("Please enter your full name.");
-        return;
+        errors.name = "Full name is required";
+      } else if (name.trim().length < 3) {
+        errors.name = "Name must be at least 3 characters";
       }
+      
       if (!phone.trim()) {
-        setError("Please enter your phone number.");
-        return;
+        errors.phone = "Phone number is required";
+      } else if (!validatePhone(phone)) {
+        errors.phone = "Invalid phone number format";
       }
+      
       if (!plateNumber.trim()) {
-        setError("Please enter vehicle plate number.");
+        errors.plate = "Vehicle plate number is required";
+      } else if (!validatePlate(plateNumber)) {
+        errors.plate = "Invalid plate format (3-10 characters)";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
         return;
       }
 
@@ -108,70 +153,101 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     setPhone("");
     setPlateNumber("");
     setError("");
+    setValidationErrors({});
   };
 
   return (
-    <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Branding */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Shield className="w-10 h-10 text-primary" />
-            <div className="text-left">
-              <h1 className="text-2xl font-bold text-foreground">SDS CORPORATION</h1>
-              <p className="text-xs text-muted-foreground">Smart Digital Security System v18.0.0</p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-primary rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-accent rounded-full blur-3xl" />
+      </div>
 
-        {/* Role Selection or Login Form */}
+      <div className="w-full max-w-2xl relative z-10">
         {!loginMode ? (
-          <div className="glass-card rounded-lg p-8 border border-border">
-            <h2 className="text-lg font-semibold text-foreground text-center mb-8">Select Access Type</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {/* Admin Login Button */}
+          <div>
+            {/* Logo/Branding */}
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
+                  <Shield className="w-7 h-7 text-primary" />
+                </div>
+                <div className="text-left">
+                  <h1 className="text-3xl font-black text-foreground">SDS</h1>
+                  <p className="text-xs text-muted-foreground font-mono">Smart Digital Security</p>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Fleet Management System</h2>
+              <p className="text-muted-foreground">Real-time GPS tracking and driver monitoring</p>
+            </div>
+
+            {/* Role Selection Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Admin Card */}
               <button
                 onClick={() => setLoginMode("admin")}
-                className="flex flex-col items-center gap-4 p-6 rounded-lg border-2 border-primary/20 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-all duration-200"
+                className="group relative glass-card rounded-xl p-8 border-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
               >
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-                  <UserCog className="w-8 h-8 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Administrator</p>
-                  <p className="text-xs text-muted-foreground">Control Center Access</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <UserCog className="w-10 h-10 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Administrator</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Control Center Access</p>
+                  <div className="flex items-center gap-2 text-primary font-semibold text-sm group-hover:gap-3 transition-all">
+                    <span>Login as Admin</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </button>
 
-              {/* Driver Login Button */}
+              {/* Driver Card */}
               <button
                 onClick={() => setLoginMode("driver")}
-                className="flex flex-col items-center gap-4 p-6 rounded-lg border-2 border-accent/20 bg-accent/5 hover:border-accent/50 hover:bg-accent/10 transition-all duration-200"
+                className="group relative glass-card rounded-xl p-8 border-2 border-accent/20 hover:border-accent/50 hover:bg-accent/5 transition-all duration-300"
               >
-                <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Truck className="w-8 h-8 text-accent" />
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">Driver</p>
-                  <p className="text-xs text-muted-foreground">GPS Vehicle Tracking</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/0 to-accent/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                    <Truck className="w-10 h-10 text-accent" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Driver</h3>
+                  <p className="text-sm text-muted-foreground mb-6">GPS Vehicle Tracking</p>
+                  <div className="flex items-center gap-2 text-accent font-semibold text-sm group-hover:gap-3 transition-all">
+                    <span>Login as Driver</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </div>
               </button>
             </div>
 
-            {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-border text-center">
-              <p className="text-xs text-muted-foreground">
-                All access is monitored and logged. Authorized use only.
-              </p>
+            {/* Footer Info */}
+            <div className="mt-12 pt-8 border-t border-border">
+              <div className="grid grid-cols-3 gap-6 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-primary">24/7</p>
+                  <p className="text-sm text-muted-foreground">Real-time Monitoring</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-accent">100%</p>
+                  <p className="text-sm text-muted-foreground">GPS Accurate</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-success">Secure</p>
+                  <p className="text-sm text-muted-foreground">Encrypted Data</p>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="glass-card rounded-lg p-8 border border-border">
+          <div className="glass-card rounded-xl p-8 border border-border">
             {/* Back Button */}
             <button
               type="button"
               onClick={resetForm}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -179,106 +255,71 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               Back to role selection
             </button>
 
-            {/* Role Indicator */}
-            <div className="flex items-center justify-center gap-3 mb-8 pb-6 border-b border-border">
+            {/* Role Header */}
+            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border">
               {loginMode === "admin" ? (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
-                  <UserCog className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">Administrator Login</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <UserCog className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Administrator Login</h3>
+                    <p className="text-xs text-muted-foreground">Control Center Access</p>
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/30">
-                  <Truck className="w-4 h-4 text-accent" />
-                  <span className="text-sm font-medium text-accent">Driver Login</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                    <Truck className="w-5 h-5 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Driver Login</h3>
+                    <p className="text-xs text-muted-foreground">Vehicle Tracking</p>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-5">
-              {/* Driver-specific fields */}
-              {loginMode === "driver" && (
-                <>
-                  {/* Driver Name Field */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Driver Name</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
-                        placeholder="Your full name"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Phone Number Field */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Phone Number</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
-                        placeholder="+250 7XX XXX XXX"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Vehicle Plate Number Field */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Vehicle Plate</label>
-                    <div className="relative">
-                      <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <input
-                        type="text"
-                        value={plateNumber}
-                        onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all uppercase"
-                        placeholder="RAD 123 A"
-                        required
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Admin-specific fields */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Admin Form */}
               {loginMode === "admin" && (
                 <>
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Email</label>
+                    <label className="text-sm font-semibold text-foreground">Admin Email</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        className={`w-full bg-input border rounded-lg py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all ${
+                          validationErrors.email ? "border-destructive/50" : "border-border"
+                        }`}
                         placeholder="admin@sds.local"
-                        required
                       />
                     </div>
+                    {validationErrors.email && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.email}
+                      </p>
+                    )}
                   </div>
 
                   {/* Password Field */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Password</label>
+                    <label className="text-sm font-semibold text-foreground">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        className={`w-full bg-input border rounded-lg py-2.5 pl-10 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all ${
+                          validationErrors.password ? "border-destructive/50" : "border-border"
+                        }`}
                         placeholder="Enter password"
-                        required
                       />
                       <button
                         type="button"
@@ -288,14 +329,94 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    {validationErrors.password && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.password}
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Driver Form */}
+              {loginMode === "driver" && (
+                <>
+                  {/* Driver Name Field */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className={`w-full bg-input border rounded-lg py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all ${
+                          validationErrors.name ? "border-destructive/50" : "border-border"
+                        }`}
+                        placeholder="Your full name"
+                      />
+                    </div>
+                    {validationErrors.name && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Phone Number Field */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Phone Number</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={`w-full bg-input border rounded-lg py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all ${
+                          validationErrors.phone ? "border-destructive/50" : "border-border"
+                        }`}
+                        placeholder="+250 798 123 456"
+                      />
+                    </div>
+                    {validationErrors.phone && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.phone}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Vehicle Plate Number Field */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Vehicle Plate</label>
+                    <div className="relative">
+                      <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="text"
+                        value={plateNumber}
+                        onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+                        className={`w-full bg-input border rounded-lg py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all uppercase font-mono ${
+                          validationErrors.plate ? "border-destructive/50" : "border-border"
+                        }`}
+                        placeholder="RAD 123 A"
+                      />
+                    </div>
+                    {validationErrors.plate && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {validationErrors.plate}
+                      </p>
+                    )}
                   </div>
                 </>
               )}
 
               {/* Error Message */}
               {error && (
-                <div className="flex items-center gap-2 text-destructive bg-destructive/10 border border-destructive/30 rounded-md p-3">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <div className="flex items-start gap-3 text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">{error}</span>
                 </div>
               )}
@@ -304,7 +425,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full font-medium py-3 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
+                className={`w-full font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
                   loginMode === "admin"
                     ? "bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
                     : "bg-accent hover:bg-accent/90 text-accent-foreground disabled:opacity-50"
@@ -318,27 +439,22 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 ) : (
                   <>
                     {loginMode === "admin" ? <Shield className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
-                    <span>{loginMode === "admin" ? "ADMIN LOGIN" : "DRIVER LOGIN"}</span>
+                    <span>{loginMode === "admin" ? "ADMIN LOGIN" : "START TRACKING"}</span>
                   </>
                 )}
               </button>
-            </div>
 
-            {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-border text-center">
-              <p className="text-xs text-muted-foreground">
-                {loginMode === "admin"
-                  ? "Administrator access. All activities are logged."
-                  : "Your vehicle location and speed will be tracked."}
-              </p>
-            </div>
-          </form>
+              {/* Info Footer */}
+              <div className="pt-4 border-t border-border text-center">
+                <p className="text-xs text-muted-foreground">
+                  {loginMode === "admin"
+                    ? "Administrator access. All activities are monitored and logged."
+                    : "Your vehicle location and speed will be tracked for compliance and safety."}
+                </p>
+              </div>
+            </form>
+          </div>
         )}
-
-        {/* System Status */}
-        <div className="mt-6 p-4 glass-card rounded-lg border border-border text-center">
-          <p className="text-xs text-muted-foreground">System Status: <span className="text-success font-medium">OPERATIONAL</span></p>
-        </div>
       </div>
     </div>
   );
