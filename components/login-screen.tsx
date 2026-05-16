@@ -164,7 +164,8 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-accent rounded-full blur-3xl" />
       </div>
 
-      <div className="w-full max-w-2xl relative z-10">
+      <div className="w-full max-w-2xl relative z-10 flex flex-col min-h-screen justify-between py-8">
+        <div>
         {!loginMode ? (
           <div>
             {/* Logo/Branding */}
@@ -455,6 +456,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             </form>
           </div>
         )}
+        </div>
+
+        {/* Footer */}
+        <div className="text-center pt-8 border-t border-border/30">
+          <p className="text-xs text-muted-foreground">
+            Powered by <span className="font-semibold text-foreground">SS Corporation</span>
+          </p>
+        </div>
       </div>
     </div>
   );
