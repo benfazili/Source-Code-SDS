@@ -298,184 +298,239 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grid-bg">
       {/* Header */}
-      <header className="glass-card border-b border-border sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-neon-cyan/20 flex items-center justify-center">
-                <Navigation className="w-5 h-5 text-neon-cyan" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-foreground">Driver Tracking System</h1>
-                <p className="text-xs text-muted-foreground font-mono">SDS CORPORATION V18.0.0</p>
-              </div>
+      <div className="glass-card border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center">
+              <Navigation className="w-6 h-6 text-accent" />
             </div>
-            <div className="flex items-center gap-4">
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono ${
-                gpsStatus === "connected" ? "bg-neon-green/20 text-neon-green" :
-                gpsStatus === "error" ? "bg-neon-red/20 text-neon-red" :
-                "bg-primary/20 text-primary"
-              }`}>
-                <div className={`w-2 h-2 rounded-full ${
-                  gpsStatus === "connected" ? "bg-neon-green" :
-                  gpsStatus === "error" ? "bg-neon-red" :
-                  "bg-primary"
-                }`} />
-                {gpsStatus === "connected" ? "GPS Active" : gpsStatus === "error" ? "GPS Error" : "Connecting..."}
-              </div>
-              <button
-                onClick={onLogout}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive hover:bg-destructive/20 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm">End Session</span>
-              </button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Vehicle Tracking</h1>
+              <p className="text-sm text-muted-foreground">Real-time GPS Speed Monitor • SDS v18.0.0</p>
             </div>
           </div>
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-card/50 transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">End Session</span>
+          </button>
         </div>
-      </header>
+      </div>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
-        {/* Driver Info */}
-        <div className="glass-card rounded-xl p-6 border border-neon-cyan/30">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Driver Info Card */}
+        <div className="glass-card rounded-lg border border-border p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-1">Driver Name</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Driver Name</p>
               <p className="text-lg font-semibold text-foreground">{driverInfo.name}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-1">Vehicle Plate</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Vehicle Plate</p>
               <p className="text-lg font-mono font-semibold text-foreground">{driverInfo.plateNumber}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-1">Phone</p>
-              <p className="text-lg font-semibold text-foreground">{driverInfo.phone}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Phone</p>
+              <p className="text-lg text-foreground">{driverInfo.phone}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-1">Session Time</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">Session Duration</p>
               <p className="text-lg font-mono font-semibold text-foreground">{formatDuration(sessionDuration)}</p>
             </div>
           </div>
         </div>
 
-        {/* Main Speed Display */}
-        <div className={`glass-card rounded-xl p-8 border-2 ${
-          speedStatus === "danger" ? "border-neon-red bg-neon-red/5" :
-          speedStatus === "warning" ? "border-neon-yellow bg-neon-yellow/5" :
-          "border-neon-green bg-neon-green/5"
-        }`}>
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex items-end gap-2">
-              <div className="text-6xl font-bold font-mono text-foreground">{currentSpeed.toFixed(1)}</div>
-              <div className="text-2xl text-muted-foreground mb-2">km/h</div>
+        {/* Speed Display */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Current Speed - Large Display */}
+          <div className={`lg:col-span-2 glass-card rounded-lg border-2 p-8 ${
+            speedStatus === "danger" ? "border-destructive/50 bg-destructive/5" :
+            speedStatus === "warning" ? "border-warning/50 bg-warning/5" :
+            "border-success/50 bg-success/5"
+          }`}>
+            <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold mb-6">Current Speed</p>
+            <div className="text-center">
+              <div className="text-7xl md:text-8xl font-mono font-black text-foreground mb-3">
+                {currentSpeed.toFixed(1)}
+              </div>
+              <p className="text-2xl text-muted-foreground font-semibold mb-6">km/h</p>
+              <div className="flex items-center justify-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${isMoving ? "bg-warning" : "bg-success"}`} />
+                <span className={`text-lg font-semibold ${isMoving ? "text-warning" : "text-success"}`}>
+                  {isMoving ? "MOVING" : "STOPPED"}
+                </span>
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">
-              Speed Limit: {SPEED_LIMIT} km/h
+
+            {/* GPS Accuracy */}
+            {gpsAccuracy !== null && (
+              <div className="mt-8 pt-6 border-t border-border/50">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">GPS Accuracy</p>
+                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-success transition-all duration-300"
+                    style={{ width: `${Math.max(10, Math.min(100, 100 - (gpsAccuracy / 50) * 50))}%` }}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">±{gpsAccuracy.toFixed(0)}m</p>
+              </div>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-1 lg:flex lg:flex-col lg:gap-4">
+            <div className="glass-card rounded-lg border border-border p-6 text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Max Speed</p>
+              <p className="text-4xl font-mono font-bold text-foreground">{maxSpeed.toFixed(1)}</p>
+              <p className="text-xs text-muted-foreground mt-2">km/h</p>
             </div>
-            <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
-              speedStatus === "danger" ? "bg-neon-red/20 text-neon-red" :
-              speedStatus === "warning" ? "bg-neon-yellow/20 text-neon-yellow" :
-              "bg-neon-green/20 text-neon-green"
-            }`}>
-              {speedStatus === "danger" ? "OVER LIMIT" : 
-               speedStatus === "warning" ? "APPROACHING LIMIT" :
-               "SAFE SPEED"}
+            <div className="glass-card rounded-lg border border-border p-6 text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Avg Speed</p>
+              <p className="text-4xl font-mono font-bold text-foreground">{averageSpeed.toFixed(1)}</p>
+              <p className="text-xs text-muted-foreground mt-2">km/h</p>
+            </div>
+            <div className="glass-card rounded-lg border border-border p-6 text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Distance</p>
+              <p className="text-4xl font-mono font-bold text-foreground">{(totalDistance / 1000).toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-2">km</p>
             </div>
           </div>
         </div>
 
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground uppercase mb-2">Max Speed</p>
-            <p className="text-3xl font-bold font-mono text-foreground">{maxSpeed.toFixed(1)}</p>
-            <p className="text-xs text-muted-foreground mt-1">km/h</p>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground uppercase mb-2">Average Speed</p>
-            <p className="text-3xl font-bold font-mono text-foreground">{averageSpeed.toFixed(1)}</p>
-            <p className="text-xs text-muted-foreground mt-1">km/h</p>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 border border-border">
-            <p className="text-xs text-muted-foreground uppercase mb-2">Total Distance</p>
-            <p className="text-3xl font-bold font-mono text-foreground">{(totalDistance / 1000).toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground mt-1">km</p>
-          </div>
-
-          <div className={`glass-card rounded-xl p-4 border-2 ${
-            isInsideZone ? "border-neon-green" : "border-neon-red"
-          }`}>
-            <p className="text-xs text-muted-foreground uppercase mb-2">Zone Status</p>
-            <p className={`text-3xl font-bold ${isInsideZone ? "text-neon-green" : "text-neon-red"}`}>
-              {isInsideZone ? "INSIDE" : "OUTSIDE"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">Kigali</p>
-          </div>
+        {/* Speed History Chart */}
+        <div className="glass-card rounded-lg border border-border p-6 mb-8">
+          <h3 className="text-lg font-semibold text-foreground mb-6">Speed History (Last 60 Readings)</h3>
+          
+          {speedRecordsRef.current.length > 0 && (
+            <div className="space-y-4">
+              {/* Chart */}
+              <div className="h-32 flex items-end gap-0.5 bg-muted/20 rounded p-2">
+                {speedRecordsRef.current.slice(-60).map((record, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex-1 rounded-t transition-colors ${
+                      record.speed > SPEED_LIMIT ? "bg-destructive" :
+                      record.speed > SPEED_LIMIT * 0.75 ? "bg-warning" :
+                      "bg-success"
+                    }`}
+                    style={{
+                      height: `${Math.max(2, (record.speed / 120) * 100)}%`,
+                      minHeight: "2px",
+                    }}
+                    title={`${record.speed.toFixed(1)} km/h`}
+                  />
+                ))}
+              </div>
+              
+              {/* Legend */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border">
+                <span>0 km/h</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-success" />
+                    <span>Safe (&lt;60)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-warning" />
+                    <span>Caution (60-80)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-destructive" />
+                    <span>Violation (&gt;80)</span>
+                  </div>
+                </div>
+                <span>120 km/h</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Location & GPS Info */}
-        <div className="glass-card rounded-xl p-4 border border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="glass-card rounded-lg border border-border p-6 mb-8">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Location Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-2">Current Location</p>
-              <p className="text-sm font-mono text-foreground">{position.lat.toFixed(6)}</p>
-              <p className="text-sm font-mono text-foreground">{position.lng.toFixed(6)}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Current Coordinates</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-mono text-sm text-foreground">{position.lat.toFixed(6)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-mono text-sm text-foreground">{position.lng.toFixed(6)}</span>
+                </div>
+              </div>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground uppercase mb-2">GPS Accuracy</p>
-              <p className={`text-lg font-mono font-semibold ${
-                gpsAccuracy && gpsAccuracy < 10 ? "text-neon-green" :
-                gpsAccuracy && gpsAccuracy < 20 ? "text-neon-yellow" :
-                "text-neon-red"
-              }`}>
-                {gpsAccuracy ? `±${gpsAccuracy}m` : "Calculating..."}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Map */}
-        <div className="glass-card rounded-xl p-4 border border-border">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Live Location Map</h3>
-          <LiveMap position={position} isInsideZone={isInsideZone} speed={currentSpeed} />
-        </div>
-
-        {/* Alert Section */}
-        {(speedStatus !== "safe" || !isInsideZone) && (
-          <div className={`glass-card rounded-xl p-4 border-2 ${
-            speedStatus === "danger" || !isInsideZone ? "border-neon-red bg-neon-red/5" : "border-neon-yellow bg-neon-yellow/5"
-          }`}>
-            <div className="flex items-start gap-4">
-              <AlertTriangle className={`w-6 h-6 flex-shrink-0 ${
-                speedStatus === "danger" || !isInsideZone ? "text-neon-red" : "text-neon-yellow"
-              }`} />
-              <div>
-                <p className="font-semibold text-foreground">
-                  {speedStatus === "danger" ? "SPEED LIMIT EXCEEDED" : 
-                   !isInsideZone ? "OUTSIDE AUTHORIZED ZONE" :
-                   "APPROACHING SPEED LIMIT"}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {speedStatus === "danger" ? `Current speed ${currentSpeed.toFixed(1)} km/h exceeds the ${SPEED_LIMIT} km/h limit.` :
-                   !isInsideZone ? "Your vehicle has moved outside the authorized Kigali zone." :
-                   `Your current speed is approaching the speed limit of ${SPEED_LIMIT} km/h.`}
-                </p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">GPS Status</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${
+                    gpsStatus === "connected" ? "bg-success" :
+                    gpsStatus === "error" ? "bg-destructive" :
+                    "bg-warning"
+                  }`} />
+                  <span className={`font-medium ${
+                    gpsStatus === "connected" ? "text-success" :
+                    gpsStatus === "error" ? "text-destructive" :
+                    "text-warning"
+                  }`}>
+                    {gpsStatus === "connected" ? "GPS CONNECTED" :
+                     gpsStatus === "error" ? "GPS ERROR" :
+                     "CONNECTING..."}
+                  </span>
+                </div>
+                {gpsAccuracy !== null && (
+                  <div className="text-sm text-foreground font-mono">
+                    Accuracy: ±{gpsAccuracy.toFixed(0)}m
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Recent Speed Readings */}
+        <div className="glass-card rounded-lg border border-border p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4">Recent Speed Readings (Last 20)</h3>
+          <div className="max-h-48 overflow-y-auto space-y-1">
+            {speedRecordsRef.current.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Waiting for GPS data...</p>
+            ) : (
+              speedRecordsRef.current.slice(-20).reverse().map((record, idx) => (
+                <div key={idx} className="flex items-center justify-between text-sm p-2 rounded hover:bg-card/30 transition-colors border border-border/30">
+                  <span className="text-muted-foreground font-mono text-xs">
+                    {new Date(record.timestamp).toLocaleTimeString()}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono font-semibold text-foreground min-w-[60px] text-right">
+                      {record.speed.toFixed(1)} km/h
+                    </span>
+                    <div className={`w-2 h-2 rounded-full ${
+                      record.speed > SPEED_LIMIT ? "bg-destructive" :
+                      record.speed > SPEED_LIMIT * 0.75 ? "bg-warning" :
+                      "bg-success"
+                    }`} />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
 
         {/* Footer */}
-        <div className="glass-card rounded-xl p-4 border border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            All driving data is continuously monitored and recorded by SDS Corporation for compliance and safety. Data sync: {currentTime.toLocaleTimeString()}
-          </p>
+        <div className="mt-8 text-center text-xs text-muted-foreground">
+          <p>Session started: {new Date(sessionStartRef.current).toLocaleString()}</p>
+          <p className="mt-1">Auto-saving to server • All data encrypted • Last update: {currentTime.toLocaleTimeString()}</p>
         </div>
-      </main>
+      </div>
     </div>
   );
+}
 }

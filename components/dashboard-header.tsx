@@ -40,24 +40,22 @@ export function DashboardHeader({ driverInfo, onLogout, hasAlerts }: DashboardHe
   };
 
   return (
-    <header className="glass border-b border-border sticky top-0 z-50">
+    <header className="glass-card border-b border-border sticky top-0 z-50">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-6">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo & Title */}
           <div className="flex items-center gap-3 lg:gap-4">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/20 flex items-center justify-center neon-blue pulse-glow">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-primary/20 flex items-center justify-center">
               <Shield className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg lg:text-xl font-bold text-foreground text-glow-blue">
+              <h1 className="text-lg lg:text-xl font-bold text-foreground">
                 SDS CORPORATION
               </h1>
-              <div className="flex items-center gap-2">
-                <span className="text-xs lg:text-sm text-primary font-mono">V18.0.0</span>
-                <span className="hidden sm:inline text-border">|</span>
-                <span className="hidden sm:inline text-xs text-muted-foreground">
-                  Smart Digital Security System
-                </span>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-primary font-mono">v18.0.0</span>
+                <span className="text-border">•</span>
+                <span className="text-muted-foreground">Admin Control Center</span>
               </div>
             </div>
           </div>
@@ -66,7 +64,7 @@ export function DashboardHeader({ driverInfo, onLogout, hasAlerts }: DashboardHe
           <div className="hidden lg:flex items-center gap-6">
             {/* Time Display */}
             <div className="text-right">
-              <div className="text-xl font-mono text-foreground tracking-wider">
+              <div className="text-lg font-mono text-foreground font-semibold">
                 {formatTime(currentTime)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -74,10 +72,15 @@ export function DashboardHeader({ driverInfo, onLogout, hasAlerts }: DashboardHe
               </div>
             </div>
 
-            <div className="h-10 w-px bg-border" />
+            <div className="h-8 w-px bg-border/50" />
 
-            {/* Status Indicator */}
-            <div className="flex items-center gap-2">
+            {/* System Status */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-success/10 border border-success/20">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <span className="text-xs font-medium text-success">SYSTEM ONLINE</span>
+            </div>
+
+            <div className="h-8 w-px bg-border/50" />
               <span className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
               <span className="text-sm text-muted-foreground">System Online</span>
             </div>

@@ -111,74 +111,67 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-primary/10 rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-primary/5 rounded-full" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10 animate-scale-up">
-        {/* Logo and Title */}
+    <div className="min-h-screen bg-background grid-bg flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo/Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full glass-card neon-blue mb-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <Shield className="w-10 h-10 text-primary" />
+            <div className="text-left">
+              <h1 className="text-2xl font-bold text-foreground">SDS CORPORATION</h1>
+              <p className="text-xs text-muted-foreground">Smart Digital Security System v18.0.0</p>
+            </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 text-glow-blue">
-            SDS CORPORATION
-          </h1>
-          <p className="text-primary font-mono text-sm tracking-wider">V18.0.0</p>
-          <p className="text-muted-foreground text-sm mt-2">
-            Smart Digital Security System
-          </p>
         </div>
 
         {/* Role Selection or Login Form */}
         {!loginMode ? (
-          <div className="glass-card rounded-xl p-6 lg:p-8">
-            <h2 className="text-lg font-semibold text-foreground text-center mb-6">Select Access Type</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="glass-card rounded-lg p-8 border border-border">
+            <h2 className="text-lg font-semibold text-foreground text-center mb-8">Select Access Type</h2>
+            <div className="grid grid-cols-1 gap-4">
               {/* Admin Login Button */}
               <button
                 onClick={() => setLoginMode("admin")}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border bg-card/50 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 group"
+                className="flex flex-col items-center gap-4 p-6 rounded-lg border-2 border-primary/20 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-all duration-200"
               >
-                <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-                  <UserCog className="w-7 h-7 text-primary" />
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                  <UserCog className="w-8 h-8 text-primary" />
                 </div>
-                <span className="font-semibold text-foreground">Admin</span>
-                <span className="text-xs text-muted-foreground text-center">Control Center Access</span>
+                <div>
+                  <p className="font-semibold text-foreground">Administrator</p>
+                  <p className="text-xs text-muted-foreground">Control Center Access</p>
+                </div>
               </button>
 
               {/* Driver Login Button */}
               <button
                 onClick={() => setLoginMode("driver")}
-                className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border bg-card/50 hover:bg-neon-cyan/10 hover:border-neon-cyan/50 transition-all duration-300 group"
+                className="flex flex-col items-center gap-4 p-6 rounded-lg border-2 border-accent/20 bg-accent/5 hover:border-accent/50 hover:bg-accent/10 transition-all duration-200"
               >
-                <div className="w-14 h-14 rounded-full bg-neon-cyan/20 flex items-center justify-center group-hover:bg-neon-cyan/30 transition-colors">
-                  <Truck className="w-7 h-7 text-neon-cyan" />
+                <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
+                  <Truck className="w-8 h-8 text-accent" />
                 </div>
-                <span className="font-semibold text-foreground">Driver</span>
-                <span className="text-xs text-muted-foreground text-center">Vehicle Tracking</span>
+                <div>
+                  <p className="font-semibold text-foreground">Driver</p>
+                  <p className="text-xs text-muted-foreground">GPS Vehicle Tracking</p>
+                </div>
               </button>
             </div>
 
             {/* Footer */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-center text-muted-foreground text-xs">
-                Select your role to continue. All access is monitored.
+            <div className="mt-8 pt-6 border-t border-border text-center">
+              <p className="text-xs text-muted-foreground">
+                All access is monitored and logged. Authorized use only.
               </p>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="glass-card rounded-xl p-6 lg:p-8">
+          <form onSubmit={handleSubmit} className="glass-card rounded-lg p-8 border border-border">
             {/* Back Button */}
             <button
               type="button"
               onClick={resetForm}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -187,37 +180,35 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             </button>
 
             {/* Role Indicator */}
-            <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center justify-center gap-3 mb-8 pb-6 border-b border-border">
               {loginMode === "admin" ? (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30">
                   <UserCog className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">Admin Login</span>
+                  <span className="text-sm font-medium text-primary">Administrator Login</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-neon-cyan/20 border border-neon-cyan/30">
-                  <Truck className="w-4 h-4 text-neon-cyan" />
-                  <span className="text-sm font-medium text-neon-cyan">Driver Login</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/30">
+                  <Truck className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium text-accent">Driver Login</span>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* Driver-specific fields */}
               {loginMode === "driver" && (
                 <>
                   {/* Driver Name Field */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Driver Full Name
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Driver Name</label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full bg-input border border-border rounded-lg py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-neon-cyan/50 focus:border-neon-cyan transition-all duration-300"
-                        placeholder="Enter your full name"
+                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
+                        placeholder="Your full name"
                         required
                       />
                     </div>
@@ -225,16 +216,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
                   {/* Phone Number Field */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Phone Number
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Phone Number</label>
                     <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full bg-input border border-border rounded-lg py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-neon-cyan/50 focus:border-neon-cyan transition-all duration-300"
+                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
                         placeholder="+250 7XX XXX XXX"
                         required
                       />
@@ -243,16 +232,14 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
                   {/* Vehicle Plate Number Field */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Vehicle Plate Number
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Vehicle Plate</label>
                     <div className="relative">
-                      <Car className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Car className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="text"
                         value={plateNumber}
                         onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-                        className="w-full bg-input border border-border rounded-lg py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-neon-cyan/50 focus:border-neon-cyan transition-all duration-300 uppercase"
+                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all uppercase"
                         placeholder="RAD 123 A"
                         required
                       />
@@ -266,17 +253,15 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 <>
                   {/* Email Field */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Admin Email
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Email</label>
                     <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-input border border-border rounded-lg py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300"
-                        placeholder="Enter admin email"
+                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        placeholder="admin@sds.local"
                         required
                       />
                     </div>
@@ -284,25 +269,23 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
                   {/* Password Field */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Password
-                    </label>
+                    <label className="text-sm font-medium text-foreground">Password</label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-input border border-border rounded-lg py-3 pl-12 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300"
-                        placeholder="Enter admin password"
+                        className="w-full bg-input border border-border rounded-md py-2 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                        placeholder="Enter password"
                         required
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -311,8 +294,8 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
               {/* Error Message */}
               {error && (
-                <div className="flex items-center gap-2 text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3 animate-fade-in-up">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <div className="flex items-center gap-2 text-destructive bg-destructive/10 border border-destructive/30 rounded-md p-3">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm">{error}</span>
                 </div>
               )}
@@ -321,43 +304,40 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full font-semibold py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                className={`w-full font-medium py-3 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
                   loginMode === "admin"
-                    ? "bg-primary hover:bg-primary/90 text-primary-foreground neon-blue"
-                    : "bg-neon-cyan hover:bg-neon-cyan/90 text-background"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-50"
+                    : "bg-accent hover:bg-accent/90 text-accent-foreground disabled:opacity-50"
                 }`}
               >
                 {isLoading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                    <span>AUTHENTICATING...</span>
+                    <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                    <span>VERIFYING...</span>
                   </>
                 ) : (
                   <>
-                    {loginMode === "admin" ? <Shield className="w-5 h-5" /> : <Truck className="w-5 h-5" />}
-                    <span>{loginMode === "admin" ? "ACCESS CONTROL CENTER" : "START TRACKING"}</span>
+                    {loginMode === "admin" ? <Shield className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
+                    <span>{loginMode === "admin" ? "ADMIN LOGIN" : "DRIVER LOGIN"}</span>
                   </>
                 )}
               </button>
             </div>
 
             {/* Footer */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-center text-muted-foreground text-xs">
+            <div className="mt-8 pt-6 border-t border-border text-center">
+              <p className="text-xs text-muted-foreground">
                 {loginMode === "admin"
-                  ? "Admin access is restricted. All actions are logged."
-                  : "Your location and speed will be monitored for safety."}
+                  ? "Administrator access. All activities are logged."
+                  : "Your vehicle location and speed will be tracked."}
               </p>
             </div>
           </form>
         )}
 
         {/* System Status */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span className="w-2 h-2 bg-neon-green rounded-full animate-pulse" />
-          <span>System Online</span>
-          <span className="text-border">|</span>
-          <span className="font-mono">Secure Connection</span>
+        <div className="mt-6 p-4 glass-card rounded-lg border border-border text-center">
+          <p className="text-xs text-muted-foreground">System Status: <span className="text-success font-medium">OPERATIONAL</span></p>
         </div>
       </div>
     </div>
