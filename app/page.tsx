@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { LoginScreen, type DriverInfo } from "@/components/login-screen";
-import { Dashboard } from "@/components/dashboard";
+import { AdminDashboard } from "@/components/admin-dashboard";
 import { DriverPanel } from "@/components/driver-panel";
 
 export default function Home() {
@@ -86,7 +86,7 @@ export default function Home() {
 
   // Route based on user role
   if (driverInfo.role === "admin") {
-    return <Dashboard driverInfo={driverInfo} onLogout={handleLogout} />;
+    return <AdminDashboard driverInfo={driverInfo} onLogout={handleLogout} />;
   }
 
   // Driver gets limited panel - no dashboard access

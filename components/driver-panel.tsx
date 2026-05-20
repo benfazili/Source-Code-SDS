@@ -250,6 +250,36 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       // Check for speed violations
       if (smoothedSpeed > SPEED_LIMIT) {
         setViolationCount(prev => prev + 1);
+
+        // Create speed violation notification
+        const notifications = JSON.parse(localStorage.getItem("sds_notifications") || "[]");
+        const lastViolationTime = localStorage.getItem(
+          `sds_last_violation_${driverInfo.plateNumber}`
+        );
+        const now = Date.now();
+
+        // Only create notification if last one was more than 30 seconds ago
+        if (
+          !lastViolationTime ||
+          now - parseInt(lastViolationTime) > 30000
+        ) {
+          const notification = {
+            id: `violation_${Date.now()}`,
+            type: "speed_violation" as const,
+            driverName: driverInfo.name,
+            driverPhone: driverInfo.phone,
+            plateNumber: driverInfo.plateNumber,
+            message: `Driver ${driverInfo.name} is exceeding speed limit (${Math.round(smoothedSpeed)} km/h > ${SPEED_LIMIT} km/h)`,
+            timestamp: new Date().toISOString(),
+            data: {
+              speed: smoothedSpeed,
+              speedLimit: SPEED_LIMIT,
+            },
+          };
+          notifications.push(notification);
+          localStorage.setItem("sds_notifications", JSON.stringify(notifications));
+          localStorage.setItem(`sds_last_violation_${driverInfo.plateNumber}`, now.toString());
+        }
       }
 
       setPosition(newPos);
@@ -297,6 +327,56 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       }
     };
   }, [driverInfo, maxSpeed, averageSpeed, violationCount, isMoving, totalDistance, currentSpeed]);
+
+  // Detect driver inactivity and send disconnection notifications
+  useEffect(() => {
+    const inactivityCheckInterval = setInterval(() => {
+      const lastActive = localStorage.getItem(`sds_driver_last_active_${driverInfo.plateNumber}`);
+      if (lastActive) {
+        const lastActiveTime = new Date(lastActive).getTime();
+        const currentTime = new Date().getTime();
+        const inactiveSeconds = (currentTime - lastActiveTime) / 1000;
+
+        // Send notification if inactive for 30+ seconds
+        if (inactiveSeconds >= 30) {
+          const notifications = JSON.parse(localStorage.getItem("sds_notifications") || "[]");
+          const existingDisconnectNotif = notifications.find(
+            (n: any) =>
+              n.type === "driver_disconnect" &&
+              n.plateNumber === driverInfo.plateNumber &&
+              new Date(n.timestamp).getTime() > currentTime - 60000 // Within last minute
+          );
+
+          if (!existingDisconnectNotif) {
+            const notification = {
+              id: `disconnect_${Date.now()}`,
+              type: "driver_disconnect" as const,
+              driverName: driverInfo.name,
+              driverPhone: driverInfo.phone,
+              plateNumber: driverInfo.plateNumber,
+              message: `Driver ${driverInfo.name} (${driverInfo.plateNumber}) has been inactive for ${Math.round(inactiveSeconds)} seconds`,
+              timestamp: new Date().toISOString(),
+              data: {
+                inactiveFor: Math.round(inactiveSeconds),
+              },
+            };
+            notifications.push(notification);
+            localStorage.setItem("sds_notifications", JSON.stringify(notifications));
+          }
+        }
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(inactivityCheckInterval);
+  }, [driverInfo]);
+
+  // Track driver activity
+  useEffect(() => {
+    localStorage.setItem(
+      `sds_driver_last_active_${driverInfo.plateNumber}`,
+      new Date().toISOString()
+    );
+  }, [currentSpeed, position, driverInfo.plateNumber]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
