@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { LayoutGrid, Bell, Settings } from "lucide-react";
+import { LayoutGrid, Bell, Settings, Shield } from "lucide-react";
 import { Dashboard } from "./dashboard";
 import { AdminNotifications } from "./admin-notifications";
 import { AdminSettings } from "./admin-settings";
+import { AdminSessions } from "./admin-sessions";
 import type { DriverInfo } from "./login-screen";
 
 interface AdminDashboardProps {
@@ -12,7 +13,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type TabType = "dashboard" | "notifications" | "settings";
+type TabType = "dashboard" | "notifications" | "settings" | "sessions";
 
 export function AdminDashboard({ driverInfo, onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
@@ -29,6 +30,12 @@ export function AdminDashboard({ driverInfo, onLogout }: AdminDashboardProps) {
       label: "Notifications",
       icon: Bell,
       badge: "alerts",
+    },
+    {
+      id: "sessions" as TabType,
+      label: "Sessions",
+      icon: Shield,
+      badge: null,
     },
     {
       id: "settings" as TabType,
@@ -92,6 +99,9 @@ export function AdminDashboard({ driverInfo, onLogout }: AdminDashboardProps) {
         )}
         {activeTab === "notifications" && (
           <AdminNotifications />
+        )}
+        {activeTab === "sessions" && (
+          <AdminSessions driverInfo={driverInfo} />
         )}
         {activeTab === "settings" && (
           <AdminSettings />
