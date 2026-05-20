@@ -7,6 +7,7 @@ import {
   AlertTriangle, CheckCircle, Clock, Radio, Navigation
 } from "lucide-react";
 import type { DriverInfo } from "./login-screen";
+import { SpeedMonitor } from "./speed-monitor";
 
 // Dynamically import map component
 const LiveMap = dynamic(() => import("./live-map"), {
@@ -168,12 +169,18 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
       const { latitude, longitude, speed: rawSpeed, accuracy, heading } = pos.coords;
       const newPos = { lat: latitude, lng: longitude };
 
-      // Calculate speed if not provided by GPS
+      // Calculate speed from GPS and position delta
       let calculatedSpeed = 0;
+      let gpsSpeed = 0;
+      let positionDeltaSpeed = 0;
+
+      // Priority 1: Use native GPS speed if available and reliable
       if (rawSpeed !== null && rawSpeed >= 0) {
-        // Convert m/s to km/h (rawSpeed * 3.6)
-        calculatedSpeed = Math.round(rawSpeed * 3.6 * 100) / 100;
-      } else if (lastPositionRef.current) {
+        gpsSpeed = rawSpeed * 3.6; // Convert m/s to km/h
+      }
+
+      // Priority 2: Calculate speed from position delta as fallback
+      if (lastPositionRef.current) {
         const distance = calculateDistance(
           lastPositionRef.current.lat,
           lastPositionRef.current.lng,
@@ -181,11 +188,16 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
           longitude
         );
         const timeDelta = (Date.now() - lastPositionRef.current.timestamp) / 1000;
+        
         // Only calculate if sufficient time has passed
-        if (timeDelta >= 0.3 && distance > 0) {
-          calculatedSpeed = Math.round(((distance / timeDelta) * 3.6) * 100) / 100;
+        if (timeDelta >= 0.3 && distance > 0 && distance < 1000) {
+          positionDeltaSpeed = (distance / timeDelta) * 3.6; // Convert m/s to km/h
         }
       }
+
+      // Use GPS speed if available, otherwise use calculated speed
+      // If both available, use GPS speed as it's more reliable
+      calculatedSpeed = gpsSpeed > 0 ? gpsSpeed : positionDeltaSpeed;
 
       // Validate GPS accuracy - more lenient threshold
       if (accuracy && accuracy > GPS_ACCURACY_THRESHOLD) {
@@ -433,60 +445,22 @@ export function DriverPanel({ driverInfo, onLogout }: DriverPanelProps) {
           </div>
         </div>
 
-        {/* Speed Display */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Current Speed - Large Display */}
-          <div className={`lg:col-span-2 glass-card rounded-lg border-2 p-8 ${
-            speedStatus === "danger" ? "border-destructive/50 bg-destructive/5" :
-            speedStatus === "warning" ? "border-warning/50 bg-warning/5" :
-            "border-success/50 bg-success/5"
-          }`}>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider font-semibold mb-6">Current Speed</p>
-            <div className="text-center">
-              <div className="text-7xl md:text-8xl font-mono font-black text-foreground mb-3">
-                {currentSpeed.toFixed(1)}
-              </div>
-              <p className="text-2xl text-muted-foreground font-semibold mb-6">km/h</p>
-              <div className="flex items-center justify-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${isMoving ? "bg-warning" : "bg-success"}`} />
-                <span className={`text-lg font-semibold ${isMoving ? "text-warning" : "text-success"}`}>
-                  {isMoving ? "MOVING" : "STOPPED"}
-                </span>
-              </div>
-            </div>
-
-            {/* GPS Accuracy */}
-            {gpsAccuracy !== null && (
-              <div className="mt-8 pt-6 border-t border-border/50">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">GPS Accuracy</p>
-                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-success transition-all duration-300"
-                    style={{ width: `${Math.max(10, Math.min(100, 100 - (gpsAccuracy / 50) * 50))}%` }}
-                  />
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">±{gpsAccuracy.toFixed(0)}m</p>
-              </div>
-            )}
+        {/* Speed Monitor & Map Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          {/* Speed Monitor - Left Side */}
+          <div className="lg:col-span-5">
+            <SpeedMonitor
+              currentSpeed={currentSpeed}
+              maxSpeed={maxSpeed}
+              isMoving={isMoving}
+              gpsStatus={gpsStatus}
+              gpsAccuracy={gpsAccuracy}
+            />
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-1 lg:flex lg:flex-col lg:gap-4">
-            <div className="glass-card rounded-lg border border-border p-6 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Max Speed</p>
-              <p className="text-4xl font-mono font-bold text-foreground">{maxSpeed.toFixed(1)}</p>
-              <p className="text-xs text-muted-foreground mt-2">km/h</p>
-            </div>
-            <div className="glass-card rounded-lg border border-border p-6 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Avg Speed</p>
-              <p className="text-4xl font-mono font-bold text-foreground">{averageSpeed.toFixed(1)}</p>
-              <p className="text-xs text-muted-foreground mt-2">km/h</p>
-            </div>
-            <div className="glass-card rounded-lg border border-border p-6 text-center">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-3">Distance</p>
-              <p className="text-4xl font-mono font-bold text-foreground">{(totalDistance / 1000).toFixed(2)}</p>
-              <p className="text-xs text-muted-foreground mt-2">km</p>
-            </div>
+          {/* Rwanda Map - Right Side */}
+          <div className="lg:col-span-7 h-96 lg:h-auto">
+            <LiveMap position={position} isInsideZone={isInsideZone} speed={currentSpeed} />
           </div>
         </div>
 
