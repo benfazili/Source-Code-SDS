@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Building2, Database, Download, Upload, Trash2, CheckCircle } from "lucide-react";
+import { Settings, Building2, Database, Download, Upload, Trash2, CheckCircle, Zap } from "lucide-react";
+import { HardwareConfigComponent } from "./hardware-config";
 
 interface AdminSettingsProps {
   onLogoUpload?: (logoUrl: string) => void;
 }
 
 export function AdminSettings({ onLogoUpload }: AdminSettingsProps) {
+  const [activeTab, setActiveTab] = useState<"company" | "hardware" | "notifications">("company");
   const [companyName, setCompanyName] = useState("SS Corporation");
   const [companyPhone, setCompanyPhone] = useState("+250 798 123 456");
   const [companyEmail, setCompanyEmail] = useState("admin@sscorp.rw");
@@ -120,6 +122,46 @@ export function AdminSettings({ onLogoUpload }: AdminSettingsProps) {
         </p>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-3 border-b border-border overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("company")}
+          className={`px-4 py-3 font-semibold text-sm whitespace-nowrap border-b-2 transition-colors ${
+            activeTab === "company"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Building2 className="w-4 h-4 inline mr-2" />
+          Company
+        </button>
+        <button
+          onClick={() => setActiveTab("hardware")}
+          className={`px-4 py-3 font-semibold text-sm whitespace-nowrap border-b-2 transition-colors ${
+            activeTab === "hardware"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Zap className="w-4 h-4 inline mr-2" />
+          Hardware
+        </button>
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`px-4 py-3 font-semibold text-sm whitespace-nowrap border-b-2 transition-colors ${
+            activeTab === "notifications"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Database className="w-4 h-4 inline mr-2" />
+          Data
+        </button>
+      </div>
+
+      {/* Company Tab */}
+      {activeTab === "company" && (
+        <>
       {/* Company Logo & Branding */}
       <div className="glass-card rounded-xl p-6 border border-border space-y-6">
         <div className="flex items-center gap-2">
@@ -212,7 +254,8 @@ export function AdminSettings({ onLogoUpload }: AdminSettingsProps) {
         </div>
       </div>
 
-      {/* Notification Settings */}
+      {/* Notification Settings - Part of Company Tab */}
+      {activeTab === "company" && (
       <div className="glass-card rounded-xl p-6 border border-border space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Settings className="w-5 h-5 text-accent" />
@@ -263,34 +306,7 @@ export function AdminSettings({ onLogoUpload }: AdminSettingsProps) {
           </label>
         ))}
       </div>
-
-      {/* Data Management */}
-      <div className="glass-card rounded-xl p-6 border border-border space-y-4">
-        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Database className="w-5 h-5 text-success" />
-          Data Management
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={handleDataExport}
-            className="flex items-center gap-2 px-4 py-3 bg-success/10 hover:bg-success/20 text-success rounded-lg font-medium transition-colors border border-success/30"
-          >
-            <Download className="w-4 h-4" />
-            Export Data
-          </button>
-          <button
-            onClick={handleClearAllData}
-            className="flex items-center gap-2 px-4 py-3 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg font-medium transition-colors border border-destructive/30"
-          >
-            <Trash2 className="w-4 h-4" />
-            Clear All Data
-          </button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Export your data as JSON for backup. Clear all data will remove all drivers, notifications, and history.
-        </p>
-      </div>
+      )}
 
       {/* Save Button */}
       <div className="flex gap-3">
@@ -308,6 +324,52 @@ export function AdminSettings({ onLogoUpload }: AdminSettingsProps) {
           </div>
         )}
       </div>
+        </>
+      )}
+
+      {/* Hardware Tab */}
+      {activeTab === "hardware" && (
+        <div className="glass-card rounded-xl p-6 border border-border">
+          <HardwareConfigComponent
+            plateNumber="ADMIN_CONFIG"
+            onSave={() => {
+              setSaved(true);
+              setTimeout(() => setSaved(false), 3000);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Notifications/Data Tab */}
+      {activeTab === "notifications" && (
+        <div className="space-y-6">
+          {/* Data Export/Import */}
+          <div className="glass-card rounded-xl p-6 border border-border space-y-6">
+            <div className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-semibold text-foreground">Data Management</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={handleExportData}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-semibold transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export All Data
+              </button>
+
+              <button
+                onClick={handleClearAllData}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg font-semibold transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Gauge, AlertTriangle, TrendingUp, Zap } from "lucide-react";
+import { Gauge, AlertTriangle, TrendingUp, Zap, Radio } from "lucide-react";
+import type { HardwareTelemetry } from "@/lib/hardware-telemetry";
 
 interface SpeedMonitorProps {
   currentSpeed: number;
@@ -9,6 +10,8 @@ interface SpeedMonitorProps {
   isMoving: boolean;
   gpsStatus: "searching" | "connected" | "error";
   gpsAccuracy: number | null;
+  hardwareTelemetry?: HardwareTelemetry | null;
+  hardwareConnected?: boolean;
 }
 
 export function SpeedMonitor({
@@ -17,6 +20,8 @@ export function SpeedMonitor({
   isMoving,
   gpsStatus,
   gpsAccuracy,
+  hardwareTelemetry,
+  hardwareConnected = false,
 }: SpeedMonitorProps) {
   const [speedTrend, setSpeedTrend] = useState<"stable" | "accelerating" | "decelerating">("stable");
   const [previousSpeed, setPreviousSpeed] = useState(currentSpeed);
@@ -193,8 +198,32 @@ export function SpeedMonitor({
         </div>
       </div>
 
-      {/* GPS & Accuracy Status */}
+      {/* Hardware & GPS Status */}
       <div className="grid grid-cols-2 gap-4">
+        {/* Hardware Status */}
+        {hardwareConnected && hardwareTelemetry ? (
+          <div className="glass-card rounded-lg border border-success/50 bg-success/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-success animate-pulse" />
+              <div>
+                <p className="text-xs text-muted-foreground">ESP32 Hardware</p>
+                <p className="font-semibold text-foreground">Connected</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="glass-card rounded-lg border border-border p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-muted-foreground/30" />
+              <div>
+                <p className="text-xs text-muted-foreground">ESP32 Hardware</p>
+                <p className="font-semibold text-foreground">Disconnected</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GPS Status */}
         <div className="glass-card rounded-lg border border-border p-4">
           <div className="flex items-center gap-3">
             <div
@@ -212,14 +241,45 @@ export function SpeedMonitor({
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Real Speed vs GPS Speed (if hardware available) */}
+      {hardwareConnected && hardwareTelemetry && (
         <div className="glass-card rounded-lg border border-border p-4">
-          <div>
-            <p className="text-xs text-muted-foreground">GPS Accuracy</p>
-            <p className="font-semibold text-foreground">
-              {gpsAccuracy ? `±${Math.round(gpsAccuracy)}m` : "Calculating..."}
-            </p>
+          <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase">
+            Speed Comparison
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Real Speed (Hall)</p>
+              <p className="text-2xl font-bold text-foreground">
+                {hardwareTelemetry.realSpeed.toFixed(1)}
+              </p>
+              <p className="text-xs text-muted-foreground">km/h</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">GPS Speed</p>
+              <p className="text-2xl font-bold text-foreground">
+                {hardwareTelemetry.gpsSpeed.toFixed(1)}
+              </p>
+              <p className="text-xs text-muted-foreground">km/h</p>
+            </div>
           </div>
+          {hardwareTelemetry.speedDifference > 2 && (
+            <div className="mt-3 pt-3 border-t border-border/30 text-xs text-warning">
+              Deviation: {hardwareTelemetry.speedDifference.toFixed(1)} km/h
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* GPS Accuracy */}
+      <div className="glass-card rounded-lg border border-border p-4">
+        <div>
+          <p className="text-xs text-muted-foreground">GPS Accuracy</p>
+          <p className="font-semibold text-foreground">
+            {gpsAccuracy ? `±${Math.round(gpsAccuracy)}m` : "Calculating..."}
+          </p>
         </div>
       </div>
 
